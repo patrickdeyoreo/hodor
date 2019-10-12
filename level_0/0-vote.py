@@ -2,7 +2,7 @@
 """ Vote for my ID
 """
 from requests import request
-from sys import argv, stderr, exit
+from sys import argv, exit, stderr
 
 
 if __name__ == '__main__':
@@ -48,6 +48,7 @@ if __name__ == '__main__':
             print(f"Submitting vote #{vote}...", end="")
             request(method="POST", url=url, headers=headers, data=data)
             print()
+
     except KeyboardInterrupt:
         print("\nReceived interrupt.")
         exit(130)
