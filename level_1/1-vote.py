@@ -51,7 +51,6 @@ if __name__ == '__main__':
             data['key'] = session.cookies['HoldTheDoor']
             headers['Cookie'] = f"HoldTheDoor={data['key']}"
             print(f"\nSession initiated (key: {data['key']})")
-
             print(f"Voting {count} times:")
             for vote in range(1, count + 1):
                 try:
@@ -72,6 +71,7 @@ if __name__ == '__main__':
                         else:
                             data['key'] = session.cookies['HoldTheDoor']
                             headers['Cookie'] = f"HoldTheDoor={data['key']}"
+                            print()
                             break
 
         except KeyboardInterrupt:
