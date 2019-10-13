@@ -19,12 +19,20 @@ def confirm(prompt="[Y/n] "):
             pass
 
 
-url = 'http://158.69.76.135/level1.php'
+url = 'http://158.69.76.135/level2.php'
 
 headers = {
     'Host': '158.69.76.135',
     'Content-Type': 'application/x-www-form-urlencoded',
-    'Referer': 'http://158.69.76.135/level1.php',
+    'Referer': 'http://158.69.76.135/level2.php',
+    'User-Agent': ' '.join([
+        'Mozilla/5.0',
+        '(Windows NT 10.0; Win64; x64)',
+        'AppleWebKit/537.36',
+        '(KHTML, like Gecko)',
+        'Chrome/74.0.3729.169',
+        'Safari/537.36',
+    ]),
 }
 
 data = {

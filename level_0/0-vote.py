@@ -1,57 +1,82 @@
 #!/usr/bin/env python3
 """ Vote for my ID
 """
-from requests import request
-from sys import argv, exit, stderr
+from requests import exceptions, request
+from sys import argv, exit as sysexit, stderr
+from time import sleep
 
 
-if __name__ == '__main__':
-    """ Vote an arbitrary number of times for my ID
+def confirm(prompt="[Y/n] "):
+    """ Get a yes/no response on stdin
     """
-    name = argv[0].split('/')[-1]
-    usage = f"usage: {name} count"
+    while True:
+        try:
+            return {
+                'Y': True,
+                'N': False
+            }[input(prompt).lstrip()[0].upper()]
+        except (IndexError, KeyError):
+            pass
 
-    if len(argv) != 2:
-        print(f"{name}: {usage}", file=stderr)
-        exit(2)
+
+url = 'http://158.69.76.135/level0.php'
+
+headers = {
+    'Host': '158.69.76.135',
+    'Content-Type': 'application/x-www-form-urlencoded',
+    'Referer': 'http://158.69.76.135/level0.php',
+}
+
+data = {
+    'id': '801',
+    'holdthedoor': 'Submit',
+}
+
+usage = f"{argv[0].split('/')[-1]} count"
+
+if len(argv) != 2:
+    print(f"usage: {usage}", file=stderr)
+    sysexit(2)
+
+try:
+    count = int(argv[1])
+except ValueError:
+    print(f"invalid count: {argv[1]}", file=stderr)
+    print(f"usage: {usage}", file=stderr)
+    sysexit(1)
+
+try:
+    if not confirm(f"Submit {count} vote{'s' * (count != 1)}? [Y/n] "):
+        print("Aborting.")
+        sysexit(0)
 
     try:
-        count = int(argv[1])
-    except ValueError:
-        print(f"{name}: {argv[1]}: count must be a number", file=stderr)
-        print(f"{name}: {usage}", file=stderr)
-        exit(1)
+        request("GET", url=url)
+    except exceptions.ConnectionError:
+        print("\nUnable to connect.")
+        sysexit(1)
 
-    url = 'http://158.69.76.135/level0.php'
-
-    headers = {
-        'Host': '158.69.76.135',
-        'Connection': 'keep-alive',
-        'Cache-Control': 'max-age=0',
-        'Origin': 'http://158.69.76.135',
-        'Upgrade-Insecure-Requests': '1',
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Accept': 'text/html,application/xhtml+xml,application/xml',
-        'Referer': 'http://158.69.76.135/level0.php',
-        'Accept-Encoding': 'gzip, deflate',
-        'Accept-Language': 'en-US,en;q=0.9',
-    }
-
-    data = {
-        'id': '801',
-        'holdthedoor': 'Submit',
-    }
-
-    try:
-        print(f"Voting {count} times:")
-        for vote in range(1, count + 1):
+    for vote in range(1, count + 1):
+        try:
             print(f"Submitting vote #{vote}...", end="")
-            request(method="POST", url=url, headers=headers, data=data)
+            request("POST", url=url, headers=headers, data=data)
             print()
+        except exceptions.ConnectionError:
+            print("\nConnecting...", end="")
+            for reconnect in range(6):
+                sleep(10)
+                try:
+                    request("GET", url=url)
+                except exceptions.ConnectionError:
+                    if reconnect == 6:
+                        print("\nUnable to connect.")
+                        sysexit(1)
+                else:
+                    print()
+                    break
+except KeyboardInterrupt:
+    print("\nReceived interrupt.")
+    sysexit(130)
 
-    except KeyboardInterrupt:
-        print("\nReceived interrupt.")
-        exit(130)
-
-    print("Done.")
-    exit(0)
+print("Done.")
+sysexit(0)
